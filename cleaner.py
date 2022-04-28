@@ -1,6 +1,10 @@
 import re
 import string
 import emoji
+import pandas as pd
+import numpy as np
+
+from collections import Counter
 from nltk import word_tokenize
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
@@ -8,6 +12,37 @@ from nltk.corpus import stopwords
 # stop_words = [..., 'can', 'did', 'am', 'is', 'are', ...]
 stop_words = set(stopwords.words('english'))
 
+# Convert words into integer
+def tokenize(column, seq_len):
+    # add every word into corpus
+    corpus = [word for text in column for word in text.split()]
+    count_words = Counter(corpus)
+    sorted_words = count_words.most_common()
+    # sort most used to least used words and give numbers from 1 to N
+    vocab_to_int = {w:i+1 for i, (w,c) in enumerate(sorted_words)}
+
+    # convert words in tweets into numbers that corresponding to the word.
+    text_int = []
+    for text in column:
+        r = [vocab_to_int[word] for word in text.split()]
+        text_int.append(r)
+
+    # create empty matrix (tweet_count, max_tweet_length) = (38809, 79)
+    features = np.zeros((len(text_int), seq_len), dtype = int)
+    for i, review in enumerate(text_int):
+        # check tweet length
+        if len(review) <= seq_len:
+            # append zeros to the head of tweet
+            zeros = list(np.zeros(seq_len - len(review)))
+            new = zeros + review
+        else:
+            # put only the max length
+            new = review[: seq_len]
+        # update matrix row like:
+        # 0, 0, ..., 1, 2, 3
+        features[i, :] = np.array(new)
+
+    return sorted_words, features
 
 # remove all punctuation and emojis
 def clear_punctuation(text): 
@@ -92,3 +127,32 @@ def start_cleaning(df):
     for _tweet in df.text:
         texts_new.append(clean_tweets(_tweet))
     return texts_new
+
+def get_processed_df(max_tweet_length):
+    df = pd.read_csv("cyberbullying_tweets.csv")
+    df = df.rename(columns={'tweet_text': 'text', 'cyberbullying_type': 'sentiment'})
+    df.duplicated().sum()
+    df = df[~df.duplicated()]
+    df.sentiment.value_counts()
+
+    texts_new = start_cleaning(df)
+
+    df['text_clean'] = texts_new
+    df["text_clean"].duplicated().sum()
+    df.drop_duplicates("text_clean", inplace=True)
+    df.sentiment.value_counts()
+    df = df[df["sentiment"]!="other_cyberbullying"]
+
+    text_len = []
+    for text in df.text_clean:
+        tweet_len = len(text.split())
+        text_len.append(tweet_len)
+
+    df['text_len'] = text_len
+
+    df = df[df['text_len'] < max_tweet_length]
+
+    df.sort_values(by=["text_len"], ascending=False)
+    df['sentiment'] = df['sentiment'].replace({'religion':0,'age':1,'ethnicity':2,'gender':3,'not_cyberbullying':4})
+    
+    return df
