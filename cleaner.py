@@ -12,6 +12,17 @@ from nltk.corpus import stopwords
 # stop_words = [..., 'can', 'did', 'am', 'is', 'are', ...]
 stop_words = set(stopwords.words('english'))
 
+def detect_cyberbully_prob(prediction_results):
+    religion_count = (prediction_results == 0).sum()
+    age_count = (prediction_results == 1).sum()
+    ethnicity_count = (prediction_results == 2).sum()
+    gender_count = (prediction_results == 3).sum()
+    not_cyberbullying_count = (prediction_results == 4).sum()
+    cyberbullying_count = len(prediction_results) - not_cyberbullying_count
+    cyberbully_percentage = (100 * cyberbullying_count) / len(prediction_results)
+
+    return round(cyberbully_percentage, 2)
+
 # Convert words into integer
 def tokenize(column, seq_len):
     # add every word into corpus

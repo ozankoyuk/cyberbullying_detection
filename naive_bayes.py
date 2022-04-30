@@ -2,6 +2,9 @@
 #%%
 import pandas as pd
 import numpy as np
+import warnings
+
+from nltk.corpus import stopwords
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -9,7 +12,8 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report
 import random
 import time 
-from cleaner import start_cleaning
+from cleaner import start_cleaning, detect_cyberbully_prob
+warnings.filterwarnings("ignore")
 
 start_time = time.time()
 
@@ -19,6 +23,8 @@ np.random.seed(seed_value)
 
 df = pd.read_csv("cyberbullying_tweets.csv")
 df = df.rename(columns={'tweet_text': 'text', 'cyberbullying_type': 'sentiment'})
+
+df_test = pd.read_csv("test.csv")
 
 # find duplicated ones and clear them
 df.duplicated().sum()
@@ -59,7 +65,7 @@ df.sort_values(by=['tweet_length'], ascending=False)
 df = df[df['tweet_length'] < 120]
 max_length = np.max(df['tweet_length'])
 
-# convert sentiments to numbers
+# convert sentiments to numbers 
 df['sentiment'] = df['sentiment'].replace(
     {
         'religion':0,
@@ -79,20 +85,8 @@ y = df['sentiment']
 X_train, X_test, y_train, y_test = train_test_split(
     X, 
     y, 
-    test_size=0.2, 
-    stratify=y, 
-    random_state=seed_value
-)
-
-# train and validation splitting :
-# convert %80 of train data into : 
-# %10 -> Validation 
-# %90 -> Train
-X_train, X_valid, y_train, y_valid = train_test_split(
-    X_train, 
-    y_train, 
     test_size=0.1, 
-    stratify=y_train, 
+    stratify=y, 
     random_state=seed_value
 )
 
@@ -116,10 +110,15 @@ nb_pred = multinominal_naive_bayes.predict(X_test_tf)
 print(
     'Algorithm : Naive Bayes\n',
     classification_report(
-        y_test, # from train and test split
-        nb_pred, 
-        target_names = sentiments # religion, age, ethnicity, gender, not_bullying
+        y_test,
+        nb_pred,
+        target_names = sentiments,
+        labels = [0, 1, 2, 3, 4]
     )
 )
-print('\nCalculation completed...\n')
-print(f'Total time: {round(time.time()-start_time, 2)}s')
+print(f"Elapsed time in seconds for Naive-Bayes:  {round(time.time()-start_time, 2)}s")
+print(
+    f"Considering the tweets of the user "
+    f"it was decided that this user is a cyberbully with a "
+    f"{detect_cyberbully_prob(nb_pred)}% probability."
+)
