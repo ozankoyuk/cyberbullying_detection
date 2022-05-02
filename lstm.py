@@ -6,7 +6,7 @@ import warnings
 import torch
 import torch.nn as nn
 
-from cleaner import get_processed_df, tokenize
+from cleaner import get_processed_df, tokenize, get_cyberbully_prob
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import RandomOverSampler
 from torch.utils.data import TensorDataset, DataLoader
@@ -33,7 +33,7 @@ LR = 3e-4
 # LSTM Dropout
 DROPOUT = 0.5 
 # number of training epoch/iteration
-EPOCHS = 1
+EPOCHS = 5
 BIDIRECTIONAL = True
 DIRECTION_COUNT = 2
 EMBEDDING_DIM = 300
@@ -373,9 +373,22 @@ for inputs, labels in test_loader:
     predicted_list.extend(predicted_test.squeeze().tolist())
     test_list.extend(labels.squeeze().tolist())
 
+accuracy_percentage = classification_report(
+    test_list, 
+    predicted_list, 
+    target_names = SENTIMENTS,
+    output_dict = True
+)['accuracy']*100
+
 print(f"Elapsed time in seconds to retrieve results:  {round(time.time()-start, 2)}s")
 print("Train accuracy for every epoch", all_accuracy_percentage)
 print(
     'Classification Report for Bi-LSTM :\n', 
     classification_report(test_list, predicted_list, target_names=SENTIMENTS)
+)
+print(
+    f"Considering the tweets of the user, "
+    f"it was decided that this user is a cyberbully with:\n"
+    f"Probability\t{get_cyberbully_prob(np.array(predicted_list))}%\n"
+    f"Accuracy\t{round(accuracy_percentage, 2)}%\n"
 )

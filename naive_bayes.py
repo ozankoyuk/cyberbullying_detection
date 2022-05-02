@@ -12,7 +12,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report
 import random
 import time 
-from cleaner import start_cleaning, detect_cyberbully_prob
+from cleaner import start_cleaning, get_cyberbully_prob
 warnings.filterwarnings("ignore")
 
 start_time = time.time()
@@ -96,7 +96,17 @@ count_vectorizer = CountVectorizer()
 X_train_cv =  count_vectorizer.fit_transform(X_train)
 X_test_cv = count_vectorizer.transform(X_test)
 
-# convert term-freq with inverse-document-frequency
+# TF-IDF: Term Frequency-Inverse Document Frequency
+# shows the importance of a word in the document
+#       number of times the word appears in the document 
+# TF = ---------------------------------------------------
+#           total number of words in the document
+#
+#                  number of documents in the corpus
+# IDF = log(-----------------------------------------------) 
+#            number of documents that contains the word +1
+#
+# TF-IDF = TF * IDF
 # TODO: can be improved with other params.
 term_freq_transformer = TfidfTransformer(use_idf=True).fit(X_train_cv)
 X_train_tf = term_freq_transformer.transform(X_train_cv)
@@ -105,20 +115,28 @@ X_test_tf = term_freq_transformer.transform(X_test_cv)
 # TODO: can be tested with other params, (alpha value)
 multinominal_naive_bayes = MultinomialNB()
 multinominal_naive_bayes.fit(X_train_tf, y_train)
-nb_pred = multinominal_naive_bayes.predict(X_test_tf)
+prediction_results = multinominal_naive_bayes.predict(X_test_tf)
+
+accuracy_percentage = classification_report(
+    y_test, 
+    prediction_results, 
+    target_names = sentiments,
+    output_dict = True
+)['accuracy']*100
 
 print(
     'Algorithm : Naive Bayes\n',
     classification_report(
         y_test,
-        nb_pred,
+        prediction_results,
         target_names = sentiments,
         labels = [0, 1, 2, 3, 4]
     )
 )
 print(f"Elapsed time in seconds for Naive-Bayes:  {round(time.time()-start_time, 2)}s")
 print(
-    f"Considering the tweets of the user "
-    f"it was decided that this user is a cyberbully with a "
-    f"{detect_cyberbully_prob(nb_pred)}% probability."
+    f"Considering the tweets of the user, "
+    f"it was decided that this user is a cyberbully with:\n"
+    f"Probability\t{get_cyberbully_prob(prediction_results)}%\n"
+    f"Accuracy\t{round(accuracy_percentage, 2)}%\n"
 )

@@ -3,6 +3,7 @@ import string
 import emoji
 import pandas as pd
 import numpy as np
+import time
 
 from collections import Counter
 from nltk import word_tokenize
@@ -12,7 +13,7 @@ from nltk.corpus import stopwords
 # stop_words = [..., 'can', 'did', 'am', 'is', 'are', ...]
 stop_words = set(stopwords.words('english'))
 
-def detect_cyberbully_prob(prediction_results):
+def get_cyberbully_prob(prediction_results):
     religion_count = (prediction_results == 0).sum()
     age_count = (prediction_results == 1).sum()
     ethnicity_count = (prediction_results == 2).sum()
@@ -126,8 +127,8 @@ def stemmer(text):
 # clear every tweet with this order
 # TODO: can be improved later on
 def clean_tweets(text):
-    text = clear_punctuation(text)
     text = clear_with_regex(text)
+    text = clear_punctuation(text)
     text = clean_hashtags(text)
     text = clear_special_chars(text)
     text = stemmer(text)
@@ -140,6 +141,8 @@ def start_cleaning(df):
     return texts_new
 
 def get_processed_df(max_tweet_length):
+    start = time.time()
+
     df = pd.read_csv("cyberbullying_tweets.csv")
     df = df.rename(columns={'tweet_text': 'text', 'cyberbullying_type': 'sentiment'})
     df.duplicated().sum()
@@ -165,5 +168,6 @@ def get_processed_df(max_tweet_length):
 
     df.sort_values(by=["text_len"], ascending=False)
     df['sentiment'] = df['sentiment'].replace({'religion':0,'age':1,'ethnicity':2,'gender':3,'not_cyberbullying':4})
+    print(f"Elapsed time for pre-processing data:  {round(time.time()-start, 2)}s")
     
     return df
