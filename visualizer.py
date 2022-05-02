@@ -96,13 +96,14 @@ for key, value in SENTIMENTS.items():
     )
 
     # python visualizer.py 
-    # komutu ile herhangi bir çıktı alınması mümkün değildir. 
-    # kodun Jupyter aracılığı ile çalıştırılması önemlidir.
-    # Jupyter içerisinden kernel eklemek için öncelikle aşağıdaki komutlar çalıştırılmalıdır:
-    # ipython kernel install --user --name=venv
-    # pip install -r requiretments.txt
+    # command will not work in a regular console/terminal
+    # the code must be running in Jupyter to get some output
+    # to add a custom kernel, you need to create a virtualenv and then define it into Jupyter:
     #
-    # bu şekilde yeni kernel Jupyter tarafına eklenmiş ve gerekli kütüphaneler eklenmiş olacaktır
+    # ipython kernel install --user --name=venv
+    # pip install -r requirements.txt
+    #
+    # with this code, you created a kernel and installed requirements into that virtualenv
     unigram_chart = pd.DataFrame(unigrams, columns = ['Text' , 'count'])
     unigram_chart.groupby('Text').\
         sum()['count'].\
@@ -130,3 +131,12 @@ for key, value in SENTIMENTS.items():
             title=f'Top 10 Bigrams for {key}',
             orientation='h'
         )
+
+#
+#  ___                   _  __                 _    
+# / _ \ ______ _ _ __   | |/ /___  _   _ _   _| | __
+#| | | |_  / _` | '_ \  | ' // _ \| | | | | | | |/ /
+#| |_| |/ / (_| | | | | | . \ (_) | |_| | |_| |   < 
+# \___//___\__,_|_| |_| |_|\_\___/ \__, |\__,_|_|\_\
+#                                  |___/            
+#

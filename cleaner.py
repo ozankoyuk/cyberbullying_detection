@@ -14,6 +14,7 @@ from nltk.corpus import stopwords
 stop_words = set(stopwords.words('english'))
 
 def get_cyberbully_prob(prediction_results):
+    # find the probabilty for given prediction results
     religion_count = (prediction_results == 0).sum()
     age_count = (prediction_results == 1).sum()
     ethnicity_count = (prediction_results == 2).sum()
@@ -171,3 +172,12 @@ def get_processed_df(max_tweet_length):
     print(f"Elapsed time for pre-processing data:  {round(time.time()-start, 2)}s")
     
     return df
+
+#
+#  ___                   _  __                 _    
+# / _ \ ______ _ _ __   | |/ /___  _   _ _   _| | __
+#| | | |_  / _` | '_ \  | ' // _ \| | | | | | | |/ /
+#| |_| |/ / (_| | | | | | . \ (_) | |_| | |_| |   < 
+# \___//___\__,_|_| |_| |_|\_\___/ \__, |\__,_|_|\_\
+#                                  |___/            
+#

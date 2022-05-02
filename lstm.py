@@ -33,10 +33,10 @@ LR = 3e-4
 # LSTM Dropout
 DROPOUT = 0.5 
 # number of training epoch/iteration
-EPOCHS = 5
+EPOCHS = 1
 BIDIRECTIONAL = True
 DIRECTION_COUNT = 2
-EMBEDDING_DIM = 300
+EMBEDDING_DIM = 50
 SENTIMENTS = ["religion", "age", "ethnicity", "gender", "not bullying"]
 NUM_CLASSES = len(SENTIMENTS)
 
@@ -58,22 +58,33 @@ class LSTM(nn.Module):
                             bidirectional=BIDIRECTIONAL,
                             batch_first=True)
 
-        self.fc = nn.Linear(HIDDEN_DIM * DIRECTION_COUNT, NUM_CLASSES)
-        self.softmax = nn.LogSoftmax(dim=1)
+        self.connect_layers = nn.Linear(HIDDEN_DIM * DIRECTION_COUNT, NUM_CLASSES)
+        self.log_soft_max = nn.LogSoftmax(dim=1)
 
     def forward(self, x, hidden):
-        self.batch_size = x.size(0)
-        ##EMBEDDING LAYER
-        embedded = self.embedding(x)
-        #LSTM LAYERS
-        out, hidden = self.lstm(embedded, hidden)
-        #Extract only the hidden state from the last LSTM cell
-        out = out[:,-1,:]
-        #FULLY CONNECTED LAYERS
-        out = self.fc(out)
-        out = self.softmax(out)
+        # in this function, we need to re-initialize model
+        # within the order in the __init__function : 
+        # embedding -> lstm -> layer connection -> logsoftmax
 
-        return out, hidden
+        # set new batch size
+        self.batch_size = x.size(0)
+
+        # create embedding
+        embedded = self.embedding(x)
+        
+        # create model and hidden state
+        model, hidden_state = self.lstm(embedded, hidden)
+        
+        # get hidden state from the last LSTM cell
+        model = model[:,-1,:]
+        
+        # connect layers
+        model = self.connect_layers(model)
+
+        # set soft max
+        model = self.log_soft_max(model)
+
+        return model, hidden_state
 
 def create_hidden_layer(labels):
     hidden_state = torch.zeros(
@@ -230,10 +241,26 @@ lstm_model.embedding.weight.data.copy_(torch.from_numpy(embedding_matrix))
 approach = nn.LogSoftmax(dim=1)
 criterion = nn.NLLLoss()
 
-optimizer_AdamW = torch.optim.AdamW(lstm_model.parameters(), lr=LR, weight_decay = 5e-6)
-# optimizer_Adamax = torch.optim.Adamax(lstm_model.parameters(), lr=LR, weight_decay = 5e-6)
-# optimizer_Adagrad = torch.optim.Adagrad(lstm_model.parameters(), lr=LR, weight_decay = 5e-6)
-# optimizer_Adadelta = torch.optim.Adadelta(lstm_model.parameters(), lr=LR, weight_decay = 5e-6)
+optimizer_AdamW = torch.optim.AdamW(
+    lstm_model.parameters(), 
+    lr = LR, 
+    weight_decay = 5e-6
+)
+# optimizer_Adamax = torch.optim.Adamax(
+#   lstm_model.parameters(),
+#   lr = LR, 
+#   weight_decay = 5e-6
+# )
+# optimizer_Adagrad = torch.optim.Adagrad(
+#   lstm_model.parameters(),
+#   lr = LR, 
+#   weight_decay = 5e-6
+# )
+# optimizer_Adadelta = torch.optim.Adadelta(
+#   lstm_model.parameters(),
+#   lr=LR,
+#   weight_decay = 5e-6
+# )
 
 total_step = len(train_loader)
 total_step_val = len(valid_loader)
@@ -388,3 +415,12 @@ print(
     f"Probability\t{get_cyberbully_prob(np.array(predicted_list))}%\n"
     f"Accuracy\t{round(accuracy_percentage, 2)}%\n"
 )
+
+#
+#  ___                   _  __                 _    
+# / _ \ ______ _ _ __   | |/ /___  _   _ _   _| | __
+#| | | |_  / _` | '_ \  | ' // _ \| | | | | | | |/ /
+#| |_| |/ / (_| | | | | | . \ (_) | |_| | |_| |   < 
+# \___//___\__,_|_| |_| |_|\_\___/ \__, |\__,_|_|\_\
+#                                  |___/            
+#

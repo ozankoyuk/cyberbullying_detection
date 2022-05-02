@@ -1,11 +1,9 @@
 #%%
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import random
 import time 
 import warnings
-warnings.filterwarnings(action="ignore")
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
@@ -20,6 +18,7 @@ from cleaner import get_processed_df, get_cyberbully_prob
 seed_value = 20230337
 random.seed(seed_value)
 np.random.seed(seed_value)
+warnings.filterwarnings(action="ignore")
 
 def fit_model(clf, x_train, y_train, x_test, y_test):
     clf.fit(x_train, y_train)
@@ -108,32 +107,53 @@ perceptron_algorithm = MLPClassifier(
 
 print(f"Elapsed time for preparing models:  {round(time.time()-start, 2)}s")
 
-clfs = {
+algorithms = {
     "Random Forest": random_forest,
     "XGBoost (MLogLoss)": xg_boost_mlogloss,
     "Decision Tree": decision_tree,
     "AdaBoost Algorithm": ada_boost
+    # multilayer perceptron takes too much time to perfom
     #"Multilayer Perceptron": perceptron_algorithm
 }
-
 
 accuracy_list = []
 probability_list = []
 time_list = []
 
-for name, clf in clfs.items():
+for name, _model in algorithms.items():
     start = time.time()
-    curr_acc, predicted_list = fit_model(clf, X_train_tf, y_train, X_test_tf, y_test)
+    # fit train and test data
+    curr_acc, predicted_list = fit_model(
+        _model, 
+        X_train_tf, 
+        y_train, 
+        X_test_tf, 
+        y_test
+    )
+    
+    # add accuracy, probability and the time values
     accuracy_list.append(curr_acc)
     probability_list.append(get_cyberbully_prob(predicted_list))
-    time_list.append(round(time.time()-start, 2))
+    time_list.append(
+        round(time.time()-start, 2)
+    )
 
+# show every data in a table
 models_df = pd.DataFrame(
     {
-        "Algorithm" : clfs.keys(),
+        "Algorithm" : algorithms.keys(),
         "Accuracy (%)" : accuracy_list,
         "Probability (%)" : probability_list,
         "Total Time (s) " : time_list
     }
 ).sort_values("Accuracy (%)", ascending=False)
 models_df
+
+#
+#  ___                   _  __                 _    
+# / _ \ ______ _ _ __   | |/ /___  _   _ _   _| | __
+#| | | |_  / _` | '_ \  | ' // _ \| | | | | | | |/ /
+#| |_| |/ / (_| | | | | | . \ (_) | |_| | |_| |   < 
+# \___//___\__,_|_| |_| |_|\_\___/ \__, |\__,_|_|\_\
+#                                  |___/            
+#

@@ -3,16 +3,16 @@
 import pandas as pd
 import numpy as np
 import warnings
+import random
+import time 
 
-from nltk.corpus import stopwords
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report
-import random
-import time 
 from cleaner import start_cleaning, get_cyberbully_prob
+
 warnings.filterwarnings("ignore")
 
 start_time = time.time()
@@ -140,3 +140,12 @@ print(
     f"Probability\t{get_cyberbully_prob(prediction_results)}%\n"
     f"Accuracy\t{round(accuracy_percentage, 2)}%\n"
 )
+
+#
+#  ___                   _  __                 _    
+# / _ \ ______ _ _ __   | |/ /___  _   _ _   _| | __
+#| | | |_  / _` | '_ \  | ' // _ \| | | | | | | |/ /
+#| |_| |/ / (_| | | | | | . \ (_) | |_| | |_| |   < 
+# \___//___\__,_|_| |_| |_|\_\___/ \__, |\__,_|_|\_\
+#                                  |___/            
+#
