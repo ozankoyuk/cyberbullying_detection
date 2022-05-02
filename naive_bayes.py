@@ -85,7 +85,7 @@ y = df['sentiment']
 X_train, X_test, y_train, y_test = train_test_split(
     X, 
     y, 
-    test_size=0.1, 
+    test_size=0.2, 
     stratify=y, 
     random_state=seed_value
 )
@@ -135,7 +135,7 @@ print(
 )
 print(f"Elapsed time in seconds for Naive-Bayes:  {round(time.time()-start_time, 2)}s")
 print(
-    f"Considering the tweets of the user, "
+    f"Considering the tweets of the user, \n"
     f"it was decided that this user is a cyberbully with:\n"
     f"Probability\t{get_cyberbully_prob(prediction_results)}%\n"
     f"Accuracy\t{round(accuracy_percentage, 2)}%\n"

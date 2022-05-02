@@ -109,10 +109,11 @@ perceptron_algorithm = MLPClassifier(
 print(f"Elapsed time for preparing models:  {round(time.time()-start, 2)}s")
 
 clfs = {
-    #"Random Forest": random_forest,
-    #"XGBoost (MLogLoss)": xg_boost_mlogloss,
-    #"Decision Tree": decision_tree,
-    "Multilayer Perceptron": perceptron_algorithm
+    "Random Forest": random_forest,
+    "XGBoost (MLogLoss)": xg_boost_mlogloss,
+    "Decision Tree": decision_tree,
+    "AdaBoost Algorithm": ada_boost
+    #"Multilayer Perceptron": perceptron_algorithm
 }
 
 

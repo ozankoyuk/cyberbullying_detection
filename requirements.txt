@@ -3,3 +3,11 @@ numpy
 emoji
 nltk
 sklearn
+plotly
+wordcloud
+cufflinks
+torch
+imblearn
+gensim
+matplotlib
+xgboost

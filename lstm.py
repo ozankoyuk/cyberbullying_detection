@@ -247,7 +247,6 @@ for e in range(EPOCHS):
     start = time.time()
 
     # save changes of every batch for each iteration
-    all_accuracy_percentage = []
     validation_accuracy = []
     all_predictions_list = []
     y_val_list = []
@@ -304,10 +303,7 @@ for e in range(EPOCHS):
         # sum of values in the size of BATCH_SIZE
         total_predicted_count += labels.size(0) 
 
-    all_accuracy_percentage.append(
-        100 * correctly_predicted_count / total_predicted_count
-    )
-    
+   
     # when backward is not necessary, we can disable gradient calculation
     # to reduce memory consumption for computations
     with torch.no_grad():
