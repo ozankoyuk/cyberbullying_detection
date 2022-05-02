@@ -1,43 +1,59 @@
 #%%
 import matplotlib.pyplot as plt
 import wordcloud as wc
-from sklearn.feature_extraction.text import CountVectorizer
 import warnings
+import pandas as pd
+import cufflinks
 
 from plotly.offline import iplot
-import pandas as pd
-warnings.filterwarnings("ignore")
+from sklearn.feature_extraction.text import CountVectorizer
+from cleaner import get_processed_df
 
-import cufflinks
+warnings.filterwarnings("ignore")
 cufflinks.go_offline()
 cufflinks.set_config_file(world_readable=True, theme='pearl')
 
-from cleaner import get_processed_df
 
 SENTIMENTS = {
-    'Religion-based Cyberbullying':0,
-    'Age-based Cyberbullying':1,
-    'Ethnicity-based Cyberbullying':2,
-    'Gender-based Cyberbullying':3,
-    'Not Cyberbullying':4
+    'Religion-based Cyberbullying': 0,
+    'Age-based Cyberbullying': 1,
+    'Ethnicity-based Cyberbullying': 2,
+    'Gender-based Cyberbullying': 3,
+    'Not Cyberbullying': 4
 }
 MAX_TWEET_LENGTH = 100
 CENSOR_LIST = {'fuck':'f_ck', 'nigger':'n__ger', 'nigga': 'n__ga', 'bitch': 'b__ch', 'ass': 'a_s'}
 
-def get_top_n_gram(corpus,ngram_range,n=None):
-    vec = CountVectorizer(ngram_range=ngram_range,stop_words = wc.STOPWORDS).fit(corpus)
-    bag_of_words = vec.transform(corpus)
-    sum_words = bag_of_words.sum(axis=0) 
-    words_freq = [(word, sum_words[0, idx]) for word, idx in vec.vocabulary_.items()]
-    words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
-    return words_freq[:n]
+def get_ngram(corpus, ngram_range, n=None):
+    # create token matrix with tweets
+    count_vectorizer = CountVectorizer(
+        ngram_range = ngram_range,
+        stop_words = wc.STOPWORDS
+    ).fit(corpus)
+    
+    converted_words = count_vectorizer.transform(corpus)
+    count_words = converted_words.sum(axis=0) 
+    
+    words_frequency = [
+        (word, count_words[0, idx]) 
+        for word, idx in count_vectorizer.vocabulary_.items()
+    ]
+    # sort by count
+    words_frequency = sorted(
+        words_frequency, 
+        key = lambda x: x[1], 
+        reverse=True
+    )    
+    return words_frequency[:n]
 
+# get clean data from cleaner
 df = get_processed_df(MAX_TWEET_LENGTH)
 
 for key, value in SENTIMENTS.items():
     data = df[df['sentiment'] == value]
     data_str = ""
     for txt in data['text_clean']:
+        # censor words for wordcloud
         if any(ext in txt for ext in CENSOR_LIST.keys()):
             new_txt = txt
             for k, v in CENSOR_LIST.items():
@@ -53,17 +69,42 @@ for key, value in SENTIMENTS.items():
         height = 600,
         background_color = 'black').generate(data_str)
 
-    fig, ax = plt.subplots(figsize=(14,10))
-    ax.imshow(wordcloud, interpolation='bilinear')
+    fig, ax = plt.subplots(
+        figsize=(14,10)
+    )
+    ax.imshow(
+        wordcloud, 
+        interpolation='bilinear'
+    )
     ax.set_axis_off()
-    plt.title(f'Wordcloud of {key}', size = 20)
+    plt.title(
+        f'Wordcloud of {key}', 
+        size = 20
+    )
     plt.imshow(wordcloud)
 
-    unigrams = get_top_n_gram(data['text_clean'], (1,1), 10)
-    bigrams = get_top_n_gram(data['text_clean'], (2,2), 10)
+    # create bar chart
+    unigrams = get_ngram(
+        data['text_clean'],
+        (1,1), 
+        10
+    )
+    bigrams = get_ngram(
+        data['text_clean'],
+        (2,2), 
+        10
+    )
 
-    gender_1 = pd.DataFrame(unigrams, columns = ['Text' , 'count'])
-    gender_1.groupby('Text').\
+    # python visualizer.py 
+    # komutu ile herhangi bir çıktı alınması mümkün değildir. 
+    # kodun Jupyter aracılığı ile çalıştırılması önemlidir.
+    # Jupyter içerisinden kernel eklemek için öncelikle aşağıdaki komutlar çalıştırılmalıdır:
+    # ipython kernel install --user --name=venv
+    # pip install -r requiretments.txt
+    #
+    # bu şekilde yeni kernel Jupyter tarafına eklenmiş ve gerekli kütüphaneler eklenmiş olacaktır
+    unigram_chart = pd.DataFrame(unigrams, columns = ['Text' , 'count'])
+    unigram_chart.groupby('Text').\
         sum()['count'].\
         sort_values(ascending=True).\
         iplot(
@@ -76,8 +117,8 @@ for key, value in SENTIMENTS.items():
             orientation='h'
         )
 
-    gender_2 = pd.DataFrame(bigrams, columns = ['Text' , 'count'])
-    gender_2.groupby('Text').\
+    bigram_chart = pd.DataFrame(bigrams, columns = ['Text' , 'count'])
+    bigram_chart.groupby('Text').\
         sum()['count'].\
         sort_values(ascending=True).\
         iplot(
