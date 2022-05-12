@@ -11,3 +11,5 @@ imblearn
 gensim
 matplotlib
 xgboost
+ipython
+jupyter

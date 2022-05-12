@@ -147,7 +147,7 @@ models_df = pd.DataFrame(
         "Total Time (s) " : time_list
     }
 ).sort_values("Accuracy (%)", ascending=False)
-models_df
+print(models_df)
 
 #
 #  ___                   _  __                 _    

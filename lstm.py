@@ -33,10 +33,10 @@ LR = 3e-4
 # LSTM Dropout
 DROPOUT = 0.5 
 # number of training epoch/iteration
-EPOCHS = 1
+EPOCHS = 5
 BIDIRECTIONAL = True
 DIRECTION_COUNT = 2
-EMBEDDING_DIM = 50
+EMBEDDING_DIM = 300
 SENTIMENTS = ["religion", "age", "ethnicity", "gender", "not bullying"]
 NUM_CLASSES = len(SENTIMENTS)
 

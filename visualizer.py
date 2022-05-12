@@ -104,6 +104,7 @@ for key, value in SENTIMENTS.items():
     # pip install -r requirements.txt
     #
     # with this code, you created a kernel and installed requirements into that virtualenv
+    # now you can change the kernel frorm Jupyter Notebook screen and run the code.
     unigram_chart = pd.DataFrame(unigrams, columns = ['Text' , 'count'])
     unigram_chart.groupby('Text').\
         sum()['count'].\

@@ -24,8 +24,6 @@ np.random.seed(seed_value)
 df = pd.read_csv("cyberbullying_tweets.csv")
 df = df.rename(columns={'tweet_text': 'text', 'cyberbullying_type': 'sentiment'})
 
-df_test = pd.read_csv("test.csv")
-
 # find duplicated ones and clear them
 df.duplicated().sum()
 df = df[~df.duplicated()]
