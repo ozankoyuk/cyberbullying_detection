@@ -42,3 +42,6 @@ You can see the results from the comparison table:
 
 
 The LSTM algorithm gave the best results in these tests. I'd prefer to choose Naive Bayes and Perceptron algorithm as the second best due to their accuracy. 
+
+Version 1.0.1
+
